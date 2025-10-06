@@ -1,0 +1,26 @@
+services:
+  
+  # Database - Mongo DB
+  mongo:
+    image: mongo:8.0.8
+    logging:
+      driver: none
+    
+  server:
+    build:
+      context: server
+      dockerfile: Dockerfile
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+  
+  client:
+    build:
+      context: client
+      dockerfile: Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      - server
+    

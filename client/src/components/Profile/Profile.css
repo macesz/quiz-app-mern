@@ -1,0 +1,5 @@
+.user-profile {
+  background: rgba(59, 181, 216, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  }
