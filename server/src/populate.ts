@@ -1,16 +1,36 @@
 import Question from "./models/Question.js";
+import { IQuestion } from "./interfaces/IQuestion.js";
 
-async function fetchAndSaveQuestions(category_id, difficulty) {
+
+// Define the shape of a single question from the OpenTDB API
+interface IOpenTDBQuestion {
+  category: string;
+  type: string;
+  difficulty: string;
+  question: string;
+  correct_answer: string;
+  incorrect_answers: string[];
+}
+
+// Define the full API response shape
+interface IOpenTDBResponse {
+  response_code: number;
+  results: IOpenTDBQuestion[];
+}
+
+async function fetchAndSaveQuestions(category_id: number, difficulty: string): Promise<boolean> {  
+  
   try {
     const url = `https://opentdb.com/api.php?amount=10&category=${category_id}&difficulty=${difficulty}&type=multiple`;
     console.log(`fetching: ${url}`)
+    
     const response = await fetch(url);
-    const result = await response.json();
+    const result = (await response.json()) as IOpenTDBResponse;
 
     if (result.results && result.results.length > 0) {
       console.log(`Saving ${result.results.length} questions for category ${category_id}, difficulty ${difficulty}`);
 
-      const savePromises = result.results.map(item => {
+      const savePromises = result.results.map((item: IOpenTDBQuestion) => {
         const question = new Question({
           category_id: category_id,
           category_name: item.category,
@@ -30,7 +50,7 @@ async function fetchAndSaveQuestions(category_id, difficulty) {
       console.log(`No results for category ${category_id}, difficulty ${difficulty}`);
       return false
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(`Error fetching/saving category ${category_id}, difficulty ${difficulty}:`, err.message);
     return false
   }

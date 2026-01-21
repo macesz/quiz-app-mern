@@ -1,8 +1,15 @@
 import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express'; // CRITICAL: Ensure this is from 'express'
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
+import { ISignUpBody, ISignInBody, IUpdateUserBody } from './interfaces/IUserRequest.js';
+import { AuthRequest } from '../middleware/authMiddleware.js';
 
-export const signUpUser = async (req, res) => {
+
+export const signUpUser = async (
+    req: Request<{}, {}, ISignUpBody>,
+    res: Response
+    ) => {
     const { email, username, password } = req.body;
 
     try {
@@ -22,7 +29,12 @@ export const signUpUser = async (req, res) => {
     }
 };
 
-export const signInUser = async (req, res, next) => {
+export const signInUser = async (
+    req: Request<{}, {}, ISignInBody>,
+    res: Response, 
+    next: NextFunction
+    ) => {
+
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -50,7 +62,7 @@ export const signInUser = async (req, res, next) => {
     try {
         token = jwt.sign(
             { username: existingUser.username },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET as string,
             { expiresIn: "1h" }
         );
     } catch (err) {
@@ -62,12 +74,16 @@ export const signInUser = async (req, res, next) => {
     res.status(200).json({ token, user: { username: existingUser.username, email: existingUser.email } });
 }
 
-export const updateUser = async (req, res) => {
+export const updateUser = async (
+req: AuthRequest & Request<{}, {}, IUpdateUserBody>,    
+res: Response 
+    ) => {
     
     const userExists = await User.findOne({
         $or: [{ email: req.body.email }, { username: req.body.username }],
-        _id: { $ne: req.user._id },
+        _id: { $ne: req.user?._id },
     });
+
     if (userExists) {
         return res.status(400).json({ message: "User already exists with this email or username." });
     }
@@ -82,7 +98,10 @@ export const updateUser = async (req, res) => {
     }
 
     try {
-        const updateUser = await User.findOneAndUpdate({ username: req.user.username }, { $set: { ...req.body } }, { new: true })
+        const updateUser = await User.findOneAndUpdate(
+            { username: req.user?.username },
+            { $set: { ...req.body } }, 
+            { new: true })
 
         if (!updateUser) {
             return res.status(404).json({ message: "User not found" });
@@ -90,26 +109,26 @@ export const updateUser = async (req, res) => {
 
         const refreshedToken = jwt.sign(
             { username: updateUser.username },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET as string,
             { expiresIn: "1h" }
         )
 
         res.status(200).json({ refreshedToken, user: { username: updateUser.username, email: updateUser.email } });
     } catch (error) {
-        console.error(error.message)
+        console.error((error as Error).message)
         return res.status(500).json({ message: "Server error" });
     }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req: AuthRequest, res: Response) => {
     try {
-        const deletedUser = await User.findOneAndDelete({ username: req.user.username });
+        const deletedUser = await User.findOneAndDelete({ username: req.user?.username });
         if (!deletedUser) {
             return res.status(404).json({ message: "User not found" });
         }
         res.json({ message: "Profile successfully deleted" });
     } catch (error) {
-        console.error(error.message);
+        console.error((error as Error).message)
         res.status(500).json({ message: "Server error" });
     }
 }
