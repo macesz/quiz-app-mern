@@ -20,11 +20,30 @@
 
 Quizzical is a quiz game that lets users choose from various categories and difficulty levels, then play a maximum 10-question challenge. 
 
-It's built using the MERN stack:
-  - **MongoDB** for the database
-  - **Express.js** and **Node.js** for the backend
-  - **React** for the frontend
+🚀 Tech Stack
+This project is built using the MERN stack with a focus on type safety and scalable architecture:
 
+Frontend:
+
+React (Functional Components, Hooks, Context API)
+
+TypeScript – Provides static typing for predictable and bug-free UI development.
+
+Axios – A promise-based HTTP client for making clean, interceptable API requests to the backend.
+
+React Router Dom – Handles client-side routing and protected navigation.
+
+Backend:
+
+Node.js & Express.js – Robust server-side logic and RESTful API endpoints.
+
+TypeScript (Server-side) – Ensures data structures are consistent from the database to the client.
+
+JSON Web Tokens (JWT) – Secure authentication and authorization.
+
+Database:
+
+MongoDB & Mongoose – NoSQL database with schema-based modeling.
 The entire application is containerized using **Docker Compose**, enabling seamless **deployment** and **scalability**.
 
 This is the home page:
