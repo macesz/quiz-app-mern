@@ -1,4 +1,17 @@
-const Form = ({ handleSubmit,
+import { ISignUpBody } from "../interfaces/IUserRequest";
+import { FormErrors } from "../Services/utils";
+import React from "react";
+
+interface FormProps {
+  handleSubmit: (e: React.FormEvent) => void;
+  formData: Partial<ISignUpBody>; 
+  onChangeHandler: (field: keyof ISignUpBody) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCancel: () => void;
+  errors: FormErrors;
+}
+
+
+const Form: React.FC<FormProps> = ({ handleSubmit,
   formData,
   onChangeHandler,
   onCancel,
@@ -28,6 +41,8 @@ const Form = ({ handleSubmit,
         </label>
         {errors && errors.password && <div style={{ color: "red", fontWeight: "bold" }}>{errors.password}</div>}
       </div>
+      {/* // Only show email field if it's part of formData (for sign-up forms) */}
+      {formData.email !== undefined && (
       <div>
         <label>
           Email
@@ -39,6 +54,8 @@ const Form = ({ handleSubmit,
         </label>
         {errors && errors.email && <div style={{ color: "red", fontWeight: "bold" }}>{errors.email}</div>}
       </div>
+      )}
+
       <button type="submit" id="button" className="button">Save</button>
       <button type="button" id="button" className="button" onClick={onCancel}>Cancel</button>
     </form>

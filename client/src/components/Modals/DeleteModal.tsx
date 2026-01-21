@@ -1,10 +1,20 @@
 import "./Modal.css"
+import React from "react"
 import { useEffect, useRef } from "react"
 
-const DeleteModal = ({ openModal, closeModal, onDelete }) => {
-    const ref = useRef();
+interface DeleteModalProps {
+    openModal: boolean;
+    closeModal: () => void;
+    onDelete: () => Promise<void> | void; // Can be sync or async
+}
+
+const DeleteModal: React.FC<DeleteModalProps> = ({ openModal, closeModal, onDelete }) => {
+    const ref = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
+        const dialog = ref.current;
+        if (!dialog) return;
+        
         if (openModal) {
             ref.current?.showModal();
         } else {

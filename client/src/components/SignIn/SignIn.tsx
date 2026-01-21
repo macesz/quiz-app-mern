@@ -1,32 +1,35 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchSignInUser } from '../../apis.js';
-import Loading from '../Loading/Loading.jsx';
-import InfoModal from '../Modals/InfoModal.jsx';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { fetchSignInUser } from '../../Services/apiService';
+import Loading from '../Loading/Loading';
+import InfoModal from '../Modals/InfoModal';
+import { useAuth } from '../../context/AuthContext';
+import { ISignInBody, ISignUpBody } from '../../interfaces/IUserRequest';
 
-const SignIn = () => {
-  const [formData, setFormData] = useState({
+const SignIn: React.FC = () => {
+  const [formData, setFormData] = useState<ISignInBody>({
     username: '',
     password: ''
   });
-  const [hasError, setHasError] = useState(false);
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [errorModalText, setErrorModalText] = useState({
     title: "ERROR",
     message: ""
   });
-  const [loading, setLoading] = useState(false);
   const { updateUser } = useAuth();
   const navigate = useNavigate();
 
-  const createChangeHandler = (field) => (e) => {
+  //use ISignUpBody to expects to potentially talk about email in the change handler, as the in the Form component the email field may be present, as it handles both sign-in and sign-up forms
+  const createChangeHandler = (field: keyof ISignUpBody) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [field]: e.target.value
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
@@ -36,12 +39,11 @@ const SignIn = () => {
       localStorage.setItem("token", token);
       updateUser(user);
       navigate("/home");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setErrorModalText({
         title: "ERROR",
-        message: error.message || "Something went wrong. Please try again."
-      });
+        message: error.response?.data?.message || error.message || "Something went wrong."      });
       setHasError(true);
     } finally {
       setLoading(false);

@@ -1,39 +1,47 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "./Profile.css"
-import Form from "../Form";
+import Form from "../Form.js";
 import { useNavigate } from "react-router-dom";
-import DeleteModal from "../Modals/DeleteModal.jsx";
-import { deleteUserProfile, fetchAndUpdateUser } from "../../apis.js";
-import { validateFormData } from "../../utils.js";
-import Loading from "../Loading/Loading.jsx";
-import InfoModal from "../Modals/InfoModal.jsx"
-import { useAuth } from "../../context/AuthContext.jsx";
+import DeleteModal from "../Modals/DeleteModal.js";
+import { deleteUserProfile, fetchAndUpdateUser } from "../../Services/apiService";
+import { FormErrors, validateFormData } from "../../Services/utils";
+import Loading from "../Loading/Loading";
+import InfoModal from "../Modals/InfoModal"
+import { useAuth } from "../../context/AuthContext";
+import { ISignUpBody, IUpdateUserBody } from "../../interfaces/IUserRequest";
 
-const Profile = () => {
+const Profile: React.FC = () => {
   const { user, updateUser, removeUser } = useAuth();
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+
+  if (!user) {
+    navigate("/signin");
+    return null;
+  }
+
+
+  const [formData, setFormData] = useState<ISignUpBody>({
     username: user.username,
     password: "",
     email: user.email,
   });
-  const [editMode, setEditMode] = useState(false);
-  const [deleteMessage, setDeleteMessage] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [deleteMessage, setDeleteMessage] = useState<string>("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState<boolean>(false);
   const [errorModalText, setErrorModalText] = useState({
     title: "ERROR",
     message: ""
   });
 
-  const navigate = useNavigate();
 
-  const createChangeHandler = (field) => (e) => {
+  const createChangeHandler = (field: keyof ISignUpBody) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleSaveEdit = async (e) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const formDataErrors = validateFormData(formData);
@@ -44,13 +52,12 @@ const Profile = () => {
 
     try {
       setLoading(true);
-      await handleUpdateUser();
-    } catch (error) {
+      await handleUpdateUserAction();
+    } catch (error: any) {
       console.error(error);
       setErrorModalText({
         title: "ERROR",
-        message: error.message || "Something went wrong. Please try again."
-      });
+        message: error.response?.data?.message || error.message || "Something went wrong."      });
       setHasError(true);
       if (error.status === 401) {
         navigate("/signin");
@@ -60,51 +67,48 @@ const Profile = () => {
     }
   };
 
-  const handleUpdateUser = async () => {
-    const headers = setHeaders();
+  
 
-    const updateData = { username: formData.username, email: formData.email };
+  const handleUpdateUserAction = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found, please sign in.");
+
+    // Prepare update body based on our interface
+    const updateData: IUpdateUserBody = { 
+        username: formData.username, 
+        email: formData.email 
+    };
+    
     if (formData.password) {
       updateData.password = formData.password;
     }
 
-    const response = await fetchAndUpdateUser(headers, updateData);
-    const { refreshedToken, user } = response;
+    // Call the Axios service
+    const response = await fetchAndUpdateUser(token, updateData);
+    const { refreshedToken, user: updatedUser } = response;
 
     localStorage.setItem("token", refreshedToken);
-    updateUser(user);
+    updateUser(updatedUser);
     setEditMode(false);
-  }
-
-  const setHeaders = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      throw new Error("No token found, please sign in.");
-    }
-
-    const headers = {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    };
-
-    return headers;
   }
 
   const handleDelete = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found.");
+
       setLoading(true);
-      const headers = setHeaders();
-      const data = await deleteUserProfile(headers);
+
+      const data = await deleteUserProfile(token);
       setDeleteMessage(data.message);
-      removeUser(null);
+      removeUser();
       localStorage.removeItem('token');
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to delete profile", error);
       setErrorModalText({
         title: "ERROR",
-        message: error.message || "Something went wrong. Please try again."
+        message: error.response?.data?.message || "Something went wrong. Please try again."
       });
       setHasError(true);
       if (error.status === 401) {

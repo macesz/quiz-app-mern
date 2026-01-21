@@ -1,17 +1,19 @@
+import React from "react";
 import { useState } from "react";
-import { fetchQuestions } from "../../apis.js";
+import { fetchQuestions } from "../../Services/apiService";
 import { useNavigate } from "react-router-dom";
 import "./QuizOptions.css"
-import Loading from "../Loading/Loading.jsx";
-import InfoModal from "../Modals/InfoModal.jsx";
+import Loading from "../Loading/Loading";
+import InfoModal from "../Modals/InfoModal";
+import { IQuestionQuery } from "../../interfaces/IQuestionQuery";
 
-const QuizOptions = () => {
+const QuizOptions: React.FC = () => {
 
-    const [selectedCategory, setSelectedCategory] = useState(10);
-    const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
-    const [selectedLimit, setSelectedLimit] = useState(3);
-    const [loading, setLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<number>(10);
+    const [selectedDifficulty, setSelectedDifficulty] = useState<IQuestionQuery['difficulty']>('easy');    
+    const [selectedLimit, setSelectedLimit] = useState<number>(5);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasError, setHasError] = useState<boolean>(false);
     const [errorModalText, setErrorModalText] = useState({
         title: "ERROR",
         message: ""
@@ -19,18 +21,22 @@ const QuizOptions = () => {
 
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true);
         try {
-            const questions = await fetchQuestions(selectedDifficulty, selectedCategory, selectedLimit)
+            const query: IQuestionQuery = {
+                category_id: selectedCategory.toString(),
+                difficulty: selectedDifficulty,
+                limit: selectedLimit.toString()
+            };
+            const questions = await fetchQuestions(query);
             navigate('/quiz', { state: { filteredQuestions: questions } });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to fetch questions:", error);
             setErrorModalText({
                 title: "ERROR",
-                message: error.message || "Something went wrong. Please try again."
-            });
+                message: error.response?.data?.message || error.message || "Something went wrong."            });
             setHasError(true);
         } finally {
             setLoading(false);
@@ -45,7 +51,7 @@ const QuizOptions = () => {
                 <div className="form-group">
                     <label>
                         Choose a Category:
-                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(Number(e.target.value))}>
                             <option value={10}>Book</option>
                             <option value={11}>Film</option>
                             <option value={12}>Music</option>

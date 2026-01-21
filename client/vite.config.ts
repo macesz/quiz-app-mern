@@ -3,18 +3,15 @@ import { defineConfig } from 'vite'
 import http from "http";
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-
   return {
     server: {
       proxy: {
-        '^/api/.*': {
+        '/api': {
           target: 'http://localhost:3000',
           changeOrigin: true,
           secure: false,
           agent: new http.Agent(),
-          // rewrite: (path) => path.replace(/^\/api/, ''),
         }
       },
       cors: true

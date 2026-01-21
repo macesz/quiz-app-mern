@@ -7,7 +7,10 @@ export interface IUser {
 }
 
 // If you need the Mongoose-specific version for your models
-import { Document } from "mongoose";
-export interface IUserDocument extends IUser, Document {
-    _id: string; // Explicitly defining _id helps with type safety later
+import { Document, Types } from "mongoose";
+
+export interface IUserDocument extends Omit<IUser, '_id'>, Document {
+    // We use Types.ObjectId to satisfy Mongoose, 
+    // but Mongoose documents also allow ._id.toString()
+    _id: Types.ObjectId; 
 }

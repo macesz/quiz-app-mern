@@ -1,4 +1,6 @@
-function Home() {
+import React from 'react';
+
+const GuestView: React.FC = () => {  
   return (
     <>
       <section className="section section-hero">
@@ -15,7 +17,7 @@ function Home() {
           </div>
           <div className="info-text">
             <h2>Learn, Play, Repeat</h2>
-            <p>Pick your category and test your knowledge in fun and challenging quizzes. Play solo or compete with friends!</p>
+            <p>Pick your category and test your knowledge in fun and challenging quizzes.</p>
           </div>
         </div>
       </section>
@@ -24,7 +26,7 @@ function Home() {
         <div className="info-inner">
           <div className="info-text">
             <h2>Track Your Progress</h2>
-            <p>View your profile, see your scores, and improve your skills one quiz at a time. Every answer counts!</p>
+            <p>View your profile, see your scores, and improve your skills one quiz at a time.</p>
           </div>
           <div className="info-image">
             <img src="/undraw_questions.png" alt="Track progress" />
@@ -35,4 +37,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default GuestView;

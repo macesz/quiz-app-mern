@@ -1,6 +1,17 @@
 import "./Modal.css"
+import React from "react"
 
-const InfoModal = ( { onClose, modalText}) => {
+export interface ModalContent {
+    title: string;
+    message: string;
+}
+
+interface InfoModalProps {
+    onClose: () => void;
+    modalText: ModalContent;
+}
+
+const InfoModal: React.FC<InfoModalProps> = ( { onClose, modalText}) => {
 
     return (
         <div className="modal-backdrop">

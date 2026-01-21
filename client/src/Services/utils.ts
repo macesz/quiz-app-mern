@@ -1,5 +1,9 @@
-export const validateFormData = (formData) => {
-    const newErrors = {};
+import {ISignUpBody } from '../../../server/src/controllers/interfaces/IUserRequest';
+
+export type FormErrors = Partial<Record<keyof ISignUpBody, string>>;
+
+export const validateFormData = (formData: ISignUpBody): FormErrors => {
+    const newErrors: FormErrors = {};
 
     if (!formData.username) {
       newErrors.username = "Username is required"
@@ -19,3 +23,4 @@ export const validateFormData = (formData) => {
 
     return newErrors;
   }
+

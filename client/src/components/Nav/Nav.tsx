@@ -1,13 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
+import React from "react";
 import "./Nav.css"
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext";
 
-const NavBar = () => {
+const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { user, removeUser } = useAuth();
 
   const handleLogout = () => {
-    removeUser(null);
+    removeUser();
     localStorage.removeItem('token');
     navigate('/')
   };

@@ -1,8 +1,19 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import React from 'react';
+import Loading from "../Loading/Loading";
 
-const LandingPage = () => {
+
+const LandingPage: React.FC = () => {
     const { user } = useAuth();
+
+    if (!user) {
+        return (
+            <div className="container">
+                <Loading/>
+            </div>
+        );
+    }
 
     return ( 
         <div className="container">

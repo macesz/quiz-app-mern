@@ -6,7 +6,3 @@ export interface IQuestion extends Document {
     correct_answer: string;
     incorrect_answers: string[];
 }
-
-import { Document } from "mongoose";
-export interface IQuestionDocument extends IQuestion, Document {}
-

@@ -1,19 +1,20 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from 'react-dom';
-import InfoModal from "../Modals/InfoModal.jsx";
+import InfoModal, { ModalContent } from "../Modals/InfoModal";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./Quiz.css"
 import Loading from "../Loading/Loading";
-import { postGameResult } from "../../apis";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { postGameResult } from "../../Services/apiService";
+import { useAuth } from "../../context/AuthContext";
+import { IQuestion } from "../../interfaces/IQuestion";
 
-const decodeHtml = (html) => {
+const decodeHtml = (html: string): string => {
     const txt = document.createElement('textarea');
     txt.innerHTML = html;
     return txt.value;
 };
 
-const shuffleAnswers = (question) => {
+const shuffleAnswers = (question: IQuestion): string[] => {
     const answers = [...question.incorrect_answers, question.correct_answer];
 
     let currentIndex = answers.length;
@@ -27,39 +28,49 @@ const shuffleAnswers = (question) => {
     return answers.map(answer => decodeHtml(answer));
 }
 
-const Quiz = () => {
-    const [currentQuestionObject, setCurrentQuestionObject] = useState(null)
-    const [currentQuestion, setCurrentQuestion] = useState(null)
-    const [currentAnswers, setCurrentAnswers] = useState(null)
-    const [selectedAnswer, setSelectedAnswer] = useState(null)
-    const [isCorrect, setIsCorrect] = useState(null)
-    const [correctAnswers, setCorrectAnswers] = useState(0)
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [showResult, setShowResult] = useState(false)
-    const [showCorrect, setShowCorrect] = useState(false)
-    const [loading, setLoading] = useState(false);
-    const [modalText, setModalText] = useState({
+interface LocationState {
+    filteredQuestions: IQuestion[];
+}
+
+const Quiz: React.FC = () => {
+    const [currentQuestionObject, setCurrentQuestionObject] = useState<IQuestion | null>(null);
+    const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
+    const [currentAnswers, setCurrentAnswers] = useState<string[] | null>(null)
+    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
+    const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+    const [correctAnswers, setCorrectAnswers] = useState<number>(0)
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const [showResult, setShowResult] = useState<boolean>(false)
+    const [showCorrect, setShowCorrect] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false);
+    const [modalText, setModalText] = useState<ModalContent>({
         title: "Congratulation, you finished the quiz! You had 0 correct answer(s).",
         message: "Lets play again and try out other categories!"
     })
 
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { filteredQuestions } = useLocation().state;
+
+    const location = useLocation();
+    const state = location.state as LocationState;
+    const filteredQuestions = state?.filteredQuestions || [];
 
     useEffect(() => {
         if (filteredQuestions && filteredQuestions.length > 0) {
             loadQuestion(0);
+        } else {
+            navigate('/quiz-options');
         }
     }, [filteredQuestions])
 
-    const loadQuestion = (index) => {
+    const loadQuestion = (index: number) => {
         setLoading(true);
         setTimeout(() => {
             const questionObj = filteredQuestions[index];
+
             setCurrentQuestionObject(questionObj);
             setCurrentQuestion(decodeHtml(questionObj.question));
-            setCurrentAnswers(shuffleAnswers(questionObj));
+            setCurrentAnswers(shuffleAnswers(questionObj));            
             setSelectedAnswer(null);
             setIsCorrect(null);
             setShowCorrect(false);
@@ -67,9 +78,14 @@ const Quiz = () => {
         }, 100);
     }
 
-    const handleChoose = (event) => {
-        const answer = event.target.innerText;
-        const wasCorrect = answer === currentQuestionObject.correct_answer;
+    const handleChoose = (event: React.MouseEvent<HTMLButtonElement>) => {
+        if(!currentQuestionObject || selectedAnswer) return;
+
+        const answer = (event.target as HTMLButtonElement).innerText;
+        
+        const decodeCorrect = decodeHtml(currentQuestionObject.correct_answer); 
+        const wasCorrect = answer === decodeCorrect;
+
         const updatedCorrectAnswers = wasCorrect ? correctAnswers + 1 : correctAnswers;
 
         setSelectedAnswer(answer);
@@ -97,16 +113,27 @@ const Quiz = () => {
     }
 
     const handleResultShowClose = async () => {
+        if (!user) return;
         setLoading(true);
-        await postGameResult(user, correctAnswers, filteredQuestions.length);
+
+        const token = localStorage.getItem('token') || '';
+
+        await postGameResult(token, {
+            user_id: user._id,
+            correct: correctAnswers,
+            question_number: filteredQuestions.length,
+            rate: correctAnswers / filteredQuestions.length
+        });
         setShowResult(false);
         setLoading(false);
         navigate('/home')
     }
 
-    const renderAnswerButton = (answer, index) => {
+    const renderAnswerButton = (answer: string, index: number) => {
+        if (!currentQuestionObject) return null;
+
         const isSelected = selectedAnswer === answer;
-        const isRight = decodeHtml(currentQuestionObject.correct_answer) === answer;
+        const isRight = decodeHtml(currentQuestionObject.correct_answer) === answer 
 
         const classes = [
             "answer-button",

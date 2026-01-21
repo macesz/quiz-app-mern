@@ -1,4 +1,4 @@
-import { IUser } from "../../interfaces/IUser.js";
+import { IUser } from "./IUser.js";
 
 export interface ISignUpBody extends Pick<IUser, "username" | "email" | "password"> {}
 
