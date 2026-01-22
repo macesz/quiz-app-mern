@@ -20,30 +20,32 @@
 
 Quizzical is a quiz game that lets users choose from various categories and difficulty levels, then play a maximum 10-question challenge. 
 
-🚀 Tech Stack
+ ## Tech Stack 🚀
+
 This project is built using the MERN stack with a focus on type safety and scalable architecture:
 
-Frontend:
+## Frontend:
 
-React (Functional Components, Hooks, Context API)
+**React** (Functional Components, Hooks, Context API)
 
-TypeScript – Provides static typing for predictable and bug-free UI development.
+**TypeScript** – Provides static typing for predictable and bug-free UI development.
 
-Axios – A promise-based HTTP client for making clean, interceptable API requests to the backend.
+**Axios** – A promise-based HTTP client for making clean, interceptable API requests to the backend.
 
-React Router Dom – Handles client-side routing and protected navigation.
+**React** Router Dom – Handles client-side routing and protected navigation.
 
-Backend:
+### Backend:
 
-Node.js & Express.js – Robust server-side logic and RESTful API endpoints.
+**Node.js** & **Express.js** – Robust server-side logic and RESTful API endpoints.
 
-TypeScript (Server-side) – Ensures data structures are consistent from the database to the client.
+**TypeScript** (Server-side) – Ensures data structures are consistent from the database to the client.
 
-JSON Web Tokens (JWT) – Secure authentication and authorization.
+**JSON Web Tokens (JWT)** – Secure authentication and authorization.
 
-Database:
+### Database:
 
-MongoDB & Mongoose – NoSQL database with schema-based modeling.
+**MongoDB** & **Mongoose** – **NoSQL** database with schema-based modeling.
+
 The entire application is containerized using **Docker Compose**, enabling seamless **deployment** and **scalability**.
 
 This is the home page:
@@ -64,11 +66,18 @@ This is the home page:
 - **Backend:**  
   [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)  
   [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+  
+  [![Typescript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)]([https://nodejs.org/](https://www.typescriptlang.org/))
+
+  
 
 
 - **Frontend:**  
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)  
   [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  
+  [![Typescript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)]([https://nodejs.org/](https://www.typescriptlang.org/))
+
 
 - **Database:**  
   [![MongoDB](https://img.shields.io/badge/MongoDB-4DB33D?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
