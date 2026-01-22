@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { ISignUpBody, ISignInBody, IUpdateUserBody } from './interfaces/IUserRequest.js';
 import { AuthRequest } from '../middleware/authMiddleware.js';
+import Games from '../models/Games.js';
 
 
 export const signUpUser = async (
@@ -132,3 +133,27 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: "Server error" });
     }
 }
+
+export const getUserSt = async (req: AuthRequest, res: Response) => {
+    try {
+        const user_id= req.user?._id;
+
+        const stats = await Games.aggregate([
+            { $match: { user_id } },
+            {
+                $group: {
+                    _id: "$user_id",
+                    totalPoints: { $sum: "$correct" },
+                    totalGames: { $sum: {} }
+                }
+            }
+        ]);
+
+        const userStats = stats.length > 0 ? stats[0] : { totalPoints: 0, totalGames: 0 };
+
+        res.status(200).json(userStats);
+    } catch (error) {
+        console.error((error as Error).message)
+        res.status(500).json({ message: "Server error" });
+    }
+}   
