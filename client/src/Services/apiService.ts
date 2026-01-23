@@ -51,3 +51,10 @@ export const deleteUserProfile = async (token: string) => {
   const response = await api.delete<{ message: string }>('/users', getAuthHeaders(token));
   return response.data;
 };
+
+export const getUserStats = async (token: string) => {
+    const response = await axios.get('/users/stats', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data; 
+};

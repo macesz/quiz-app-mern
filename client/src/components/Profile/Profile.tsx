@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Profile.css"
 import Form from "../Form.js";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import DeleteModal from "../Modals/DeleteModal.js";
-import { deleteUserProfile, fetchAndUpdateUser } from "../../Services/apiService";
+import { deleteUserProfile, fetchAndUpdateUser, getUserStats } from "../../Services/apiService";
 import { FormErrors, validateFormData } from "../../Services/utils";
 import Loading from "../Loading/Loading";
 import InfoModal from "../Modals/InfoModal"
@@ -13,6 +13,7 @@ import { ISignUpBody, IUpdateUserBody } from "../../interfaces/IUserRequest";
 const Profile: React.FC = () => {
   const { user, updateUser, removeUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (!user) {
     navigate("/signin");
@@ -25,6 +26,7 @@ const Profile: React.FC = () => {
     password: "",
     email: user.email,
   });
+  const [totalPoints, setTotalPoints] = useState<number>(0);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [deleteMessage, setDeleteMessage] = useState<string>("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -35,6 +37,28 @@ const Profile: React.FC = () => {
     title: "ERROR",
     message: ""
   });
+
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      console.log("useEffect Triggered!"); // Debugging line
+      const token = localStorage.getItem("token");
+
+      try {
+        if (!token) throw new Error("No token found, please sign in.");
+
+        setLoading(true);
+        
+        const data = await getUserStats(token);
+        setTotalPoints(data.totalPoints || 0);
+      } catch (error) {
+        console.error("Failed to fetch user stats", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserStats();
+  }, [location.key, user]);
 
 
   const createChangeHandler = (field: keyof ISignUpBody) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,6 +149,13 @@ const Profile: React.FC = () => {
     <>
       <div className="form">
         <h2>Your profile:</h2>
+
+          {!editMode && !deleteMessage && (
+            <div className="stats-badge">
+             <p>🏆 Total Points: <strong>{totalPoints}</strong></p>
+          </div>
+        )}
+
         {deleteMessage ? (
           <p>{deleteMessage}</p>
         ) : editMode ? (
